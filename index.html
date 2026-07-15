@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Khushi's Pocket Studio ✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--lav:#C9B8E8;--lav-d:#9B85CC;--blush:#F7C5D0;--shadow:rgba(155,133,204,0.18);}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Quicksand',sans-serif;background:linear-gradient(135deg,#F0EAFF 0%,#FFE8EE 40%,#E8F8F3 100%);min-height:100vh;overflow-x:hidden;}
+
+#err-bar{display:none;position:fixed;top:0;left:0;right:0;background:#ff4d6d;color:#fff;font-size:12px;font-weight:700;padding:8px 12px;z-index:99999;text-align:center;}
+
+#heart-rain{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;display:none;}
+.hd{position:absolute;top:-60px;animation:fallH 3s linear forwards;}
+@keyframes fallH{0%{transform:translateY(0) rotate(-15deg);opacity:1;}100%{transform:translateY(110vh) rotate(20deg);opacity:0;}}
+
+.modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(80,60,120,0.45);backdrop-filter:blur(8px);align-items:center;justify-content:center;padding:20px;}
+.modal.show{display:flex;}
+@keyframes cardPop{from{transform:scale(0.7) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.mcard{background:linear-gradient(145deg,#fff8ff,#f5eeff);border-radius:24px;padding:28px 24px;max-width:380px;width:100%;box-shadow:0 24px 60px rgba(120,80,180,0.25);animation:cardPop 0.4s cubic-bezier(.34,1.56,.64,1);}
+.mcard h2{font-family:'Caveat',cursive;font-size:26px;color:#9B85CC;margin-bottom:12px;}
+.mcard h3{font-family:'Caveat',cursive;font-size:22px;color:#9B85CC;margin-bottom:8px;}
+.mcard p{font-size:14px;line-height:1.75;color:#5C4F7A;margin-bottom:18px;}
+.mcard .hint{font-size:11px;color:#9B8AB5;margin-bottom:14px;}
+.hb{font-size:48px;display:block;text-align:center;margin-bottom:12px;animation:pulse 1.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.btn-prim{background:linear-gradient(135deg,#C9B8E8,#F7C5D0);border:none;border-radius:50px;padding:11px 28px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#fff;cursor:pointer;box-shadow:0 4px 14px rgba(180,140,220,0.35);}
+.btn-sec{background:rgba(240,235,255,0.9);border:1.5px solid rgba(200,180,240,0.5);border-radius:12px;padding:11px 20px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:13px;color:#9B85CC;cursor:pointer;}
+.btn-row{display:flex;gap:10px;}
+.btn-row button{flex:1;}
+.note-inp{width:100%;padding:11px 15px;border-radius:12px;border:1.5px solid rgba(200,180,240,0.5);background:#fff;font-family:'Caveat',cursive;font-size:17px;color:#5C4F7A;outline:none;margin-bottom:10px;}
+.note-inp:focus{border-color:#C9B8E8;}
+.transparent-opt{display:flex;align-items:center;gap:8px;font-size:12px;color:#7A6B9A;margin-bottom:14px;font-weight:600;}
+
+header{background:rgba(255,255,255,0.8);backdrop-filter:blur(16px);border-bottom:1.5px solid rgba(200,180,240,0.3);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Caveat',cursive;font-size:22px;color:#9B85CC;font-weight:700;}
+.logo span{color:#F7A0B5;}
+.khushi-btn{background:linear-gradient(135deg,#E8B8D4,#C9A8E8);border:none;border-radius:50px;padding:8px 16px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:12px;color:#fff;cursor:pointer;box-shadow:0 4px 12px rgba(180,130,200,0.3);}
+
+.tabs{display:flex;background:rgba(255,255,255,0.6);border-bottom:1.5px solid rgba(200,180,240,0.2);}
+.tab{flex:1;text-align:center;padding:11px 4px;font-size:11px;font-weight:700;color:#9B8AB5;cursor:pointer;border-bottom:3px solid transparent;transition:all 0.2s;}
+.tab.active{color:#9B85CC;border-bottom-color:#C9B8E8;}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+.canvas-wrap{position:relative;margin:12px 12px 0;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px var(--shadow),0 0 0 1.5px rgba(200,180,240,0.25);touch-action:none;background:#fff;}
+canvas{display:block;width:100%;touch-action:none;cursor:crosshair;}
+
+.toolbar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(255,255,255,0.9);margin:0 12px;border-radius:0 0 14px 14px;flex-wrap:wrap;justify-content:center;box-shadow:0 3px 12px rgba(150,130,200,0.08);}
+.tb{width:34px;height:34px;border-radius:10px;border:none;background:rgba(240,235,255,0.8);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:#7A6B9A;font-weight:700;flex-shrink:0;}
+.tb.active{background:linear-gradient(135deg,#C9B8E8,#E8C8D8);color:#fff;}
+.tdiv{width:1px;height:22px;background:rgba(180,160,220,0.25);margin:0 1px;flex-shrink:0;}
+
+.brush-row{display:flex;gap:6px;padding:8px 12px 4px;overflow-x:auto;scrollbar-width:none;}
+.brush-row::-webkit-scrollbar{display:none;}
+.brush-chip{padding:6px 12px;border-radius:50px;border:1.5px solid rgba(180,160,220,0.4);background:rgba(255,255,255,0.8);font-size:11px;font-weight:700;color:#8B7AAA;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.brush-chip.active{background:linear-gradient(135deg,#C9B8E8,#E8C8D8);color:#fff;border-color:transparent;}
+
+.swatch-row{display:flex;gap:5px;padding:8px 12px 4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.swatch-row::-webkit-scrollbar{display:none;}
+.sw{width:26px;height:26px;border-radius:50%;cursor:pointer;flex-shrink:0;border:2.5px solid transparent;box-shadow:0 2px 5px rgba(0,0,0,0.08);}
+.sw.active{border-color:#9B85CC;transform:scale(1.2);}
+input[type=color].cc{width:26px;height:26px;border-radius:50%;border:2px solid #ddd;padding:0;cursor:pointer;flex-shrink:0;overflow:hidden;}
+
+.row-sl{display:flex;align-items:center;gap:7px;padding:3px 12px 5px;}
+.lbl{font-size:10px;color:#9B8AB5;font-weight:700;min-width:34px;}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;border-radius:3px;background:linear-gradient(to right,#C9B8E8,#F7C5D0);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#9B85CC;cursor:pointer;}
+.lbl-val{font-size:10px;color:#9B8AB5;min-width:28px;text-align:right;}
+
+.bg-row{display:flex;align-items:center;gap:6px;padding:2px 12px 7px;overflow-x:auto;scrollbar-width:none;}
+.bg-row::-webkit-scrollbar{display:none;}
+.bg-sw{width:22px;height:22px;border-radius:6px;cursor:pointer;flex-shrink:0;border:2px solid transparent;}
+.bg-sw.active{border-color:#9B85CC;transform:scale(1.15);}
+
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 3px;}
+.sec-hdr h3{font-size:12px;font-weight:700;color:#9B85CC;}
+.sec-hdr small{font-size:9px;color:#B0A0C8;}
+
+.search-row{padding:2px 12px 6px;}
+.search-row input{width:100%;padding:7px 12px;border-radius:10px;border:1.5px solid rgba(200,180,240,0.4);font-size:12px;font-family:'Quicksand',sans-serif;outline:none;}
+.search-row input:focus{border-color:#C9B8E8;}
+
+.stamp-cats{display:flex;gap:5px;overflow-x:auto;padding:0 12px 5px;scrollbar-width:none;}
+.stamp-cats::-webkit-scrollbar{display:none;}
+.cat-btn{padding:4px 11px;border-radius:50px;border:1.5px solid rgba(180,160,220,0.4);background:rgba(255,255,255,0.8);font-size:10px;font-weight:700;color:#8B7AAA;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.cat-btn.active{background:linear-gradient(135deg,#C9B8E8,#E8C8D8);color:#fff;border-color:transparent;}
+.stamp-active-bar{background:rgba(155,133,204,0.12);border-radius:8px;margin:0 12px 4px;padding:5px 10px;font-size:10px;color:#7A6B9A;font-weight:700;display:none;border:1px dashed rgba(200,180,240,0.5);}
+.stamp-active-bar.show{display:block;}
+.tint-row{display:none;align-items:center;gap:5px;padding:2px 12px 5px;}
+.tint-row.show{display:flex;}
+.tint-sw{width:20px;height:20px;border-radius:5px;cursor:pointer;flex-shrink:0;border:2px solid transparent;}
+.tint-sw.active{border-color:#9B85CC;}
+.stamp-scale-row{display:flex;align-items:center;gap:7px;padding:2px 12px 6px;}
+.stamp-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;padding:4px 12px 8px;max-height:220px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#C9B8E8 transparent;}
+.si{position:relative;aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,0.95);display:flex;align-items:center;justify-content:center;cursor:pointer;border:1.5px solid rgba(200,180,240,0.25);overflow:hidden;}
+.si.sel{border-color:#9B85CC;background:rgba(200,180,240,0.2);}
+.si svg,.si img{width:72%;height:72%;object-fit:contain;pointer-events:none;}
+.fav-star{position:absolute;top:1px;right:2px;font-size:10px;color:#ddd;cursor:pointer;line-height:1;}
+.fav-star.active{color:#FFD700;}
+
+#draw-mode .canvas-wrap{margin-top:12px;}
+.doodle-tbar{display:flex;align-items:center;gap:6px;padding:7px 12px;background:rgba(245,240,255,0.95);flex-wrap:wrap;}
+.doodle-actions{display:flex;gap:8px;padding:7px 12px 10px;background:rgba(245,240,255,0.95);}
+.doodle-actions button{flex:1;padding:9px;border:none;border-radius:11px;font-family:'Quicksand',sans-serif;font-weight:700;font-size:12px;cursor:pointer;}
+.btn-save-doodle{background:linear-gradient(135deg,#C9B8E8,#F7C5D0);color:#fff;}
+.btn-clear-doodle{background:rgba(240,235,255,0.9);color:#9B85CC;border:1.5px solid rgba(200,180,240,0.4)!important;}
+.save-hint{font-size:10px;color:#B0A0C8;text-align:center;padding:0 12px 8px;}
+
+.tgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px;padding:12px;}
+.tc{background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;box-shadow:0 3px 14px rgba(150,120,200,0.1),0 0 0 1.5px rgba(200,180,240,0.2);}
+.tc svg{width:100%;height:auto;display:block;}
+.tc-label{font-size:10px;font-weight:700;color:#9B85CC;text-align:center;padding:6px;background:rgba(245,240,255,0.9);}
+.vh{display:flex;align-items:center;gap:8px;padding:10px 12px;background:rgba(255,255,255,0.85);}
+.back-btn{background:none;border:none;font-size:20px;cursor:pointer;color:#9B85CC;padding:2px;}
+.vh h3{font-size:14px;font-weight:700;color:#9B85CC;flex:1;}
+.v-wrap{margin:0 12px;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px var(--shadow);background:#fff;}
+.v-actions{display:flex;gap:8px;padding:8px 12px 14px;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:rgba(70,50,120,0.92);color:#fff;padding:9px 20px;border-radius:50px;font-size:12px;font-weight:700;z-index:9999;transition:transform 0.25s;white-space:nowrap;pointer-events:none;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.gap{height:18px;}
+</style>
+</head>
+<body>
+
+<div id="err-bar"></div>
+<div id="heart-rain"></div>
+
+<div id="love-modal" class="modal">
+  <div class="mcard" style="text-align:center;">
+    <span class="hb">💜</span>
+    <h2>For My Khushi 🌸</h2>
+    <p>You fell, and for a second the world paused — because someone as rare as you deserves every bit of care the universe can give.<br><br>
+    You are the sharpest mind I know, the softest heart I have ever held, and the most beautiful thing that ever happened to me.<br><br>
+    Rest. Heal. Know that I am here — not because I have to be, but because there is nowhere else I would ever want to be.<br><br>
+    <strong style="color:#C9A8E8;">Get well soon, my love. 🌷</strong></p>
+    <button class="btn-prim" onclick="closeLove()">💕 Thank you, K</button>
+  </div>
+</div>
+
+<div id="dl-modal" class="modal">
+  <div class="mcard">
+    <h3>✨ Save your creation</h3>
+    <p class="hint">Add a little note — it will appear on your sticky note!</p>
+    <input class="note-inp" id="note-text" placeholder="Write something sweet... 🌸" maxlength="40">
+    <label class="transparent-opt"><input type="checkbox" id="dl-transparent"> Save as plain image (no sticky frame)</label>
+    <div class="btn-row">
+      <button class="btn-sec" onclick="closeDL()">Cancel</button>
+      <button class="btn-prim" onclick="doDownload()">Save 💾</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div class="logo">Khushi's <span>Studio</span> ✨</div>
+  <button class="khushi-btn" onclick="triggerKhushi()">💜 Khushi</button>
+</header>
+
+<div class="tabs">
+  <div class="tab active" id="tab-create" onclick="switchTab('create')">🎨 Create</div>
+  <div class="tab" id="tab-colour" onclick="switchTab('colour')">🖌️ Colour It</div>
+  <div class="tab" id="tab-draw" onclick="switchTab('draw')">✍️ Draw Doodle</div>
+</div>
+
+<!-- CREATE -->
+<div id="create-mode" class="panel active">
+  <div class="canvas-wrap" id="main-wrap">
+    <canvas id="main-canvas"></canvas>
+  </div>
+
+  <div class="toolbar">
+    <button class="tb" onclick="undoMain()">↩</button>
+    <button class="tb" onclick="redoMain()">↪</button>
+    <button class="tb" id="t-fill" onclick="setTool('fill')">🪣</button>
+    <button class="tb" id="t-eraser" onclick="setTool('eraser')">🧹</button>
+    <button class="tb" id="t-text" onclick="setTool('text')">T</button>
+    <div class="tdiv"></div>
+    <button class="tb" onclick="clearMain()">🗑</button>
+    <div class="tdiv"></div>
+    <button class="tb" onclick="openDL('main')">💾</button>
+  </div>
+
+  <div class="brush-row" id="brush-type-row"></div>
+
+  <div class="swatch-row" id="draw-colors"></div>
+  <div class="row-sl">
+    <span class="lbl">Size</span>
+    <input type="range" id="brush-sz" min="1" max="40" value="5" oninput="brushSz=+this.value;document.getElementById('bsv').textContent=this.value">
+    <span class="lbl-val" id="bsv">5</span>
+  </div>
+  <div class="row-sl">
+    <span class="lbl">Opacity</span>
+    <input type="range" id="op-sl" min="5" max="100" value="100" oninput="curOpacity=+this.value/100;document.getElementById('opv').textContent=this.value+'%'">
+    <span class="lbl-val" id="opv">100%</span>
+  </div>
+
+  <div class="bg-row">
+    <span class="lbl">BG</span>
+    <div id="bg-swatches"></div>
+  </div>
+
+  <div class="sec-hdr">
+    <h3>🎁 Doodle Stamps</h3>
+    <small>Tap stamp → tap canvas</small>
+  </div>
+  <div class="search-row"><input type="text" id="stamp-search" placeholder="🔍 Search stamps..."></div>
+  <div class="stamp-cats" id="stamp-cats"></div>
+  <div class="stamp-active-bar" id="stamp-bar">✦ Stamp ready — tap the canvas to place it!</div>
+  <div class="tint-row" id="tint-row">
+    <span class="lbl">Colour</span>
+    <div id="tint-swatches"></div>
+  </div>
+  <div class="stamp-scale-row">
+    <span class="lbl">Stamp size</span>
+    <input type="range" min="50" max="200" value="100" oninput="setStampScale(this.value/100)">
+  </div>
+  <div class="stamp-grid" id="stamp-grid"></div>
+
+  <div class="gap"></div>
+</div>
+
+<!-- COLOUR IT -->
+<div id="colour-mode" class="panel">
+  <div id="tpl-list">
+    <div style="padding:12px 12px 4px;font-size:12px;font-weight:700;color:#9B85CC;">🌸 Pick a template to colour</div>
+    <div class="tgrid" id="tpl-grid"></div>
+    <div class="gap"></div>
+  </div>
+  <div id="tpl-viewer" style="display:none;">
+    <div class="vh">
+      <button class="back-btn" onclick="backToList()">←</button>
+      <h3 id="vt">Template</h3>
+      <button class="tb" onclick="openDL('tpl')" style="font-size:13px;">💾</button>
+    </div>
+    <div class="v-wrap">
+      <canvas id="tpl-canvas"></canvas>
+    </div>
+    <div class="swatch-row" id="tpl-colors" style="padding:8px 12px;"></div>
+    <div class="row-sl">
+      <span class="lbl">Size</span>
+      <input type="range" id="tpl-sz" min="2" max="30" value="10" oninput="tplSz=+this.value">
+    </div>
+    <div class="v-actions">
+      <button class="btn-sec" style="flex:1;" onclick="undoTpl()">Undo ↩</button>
+      <button class="btn-sec" style="flex:1;" onclick="resetTpl()">Reset 🔄</button>
+      <button class="btn-prim" style="flex:1;" onclick="openDL('tpl')">Save 💾</button>
+    </div>
+    <div class="gap"></div>
+  </div>
+</div>
+
+<!-- DRAW DOODLE -->
+<div id="draw-mode" class="panel">
+  <div class="sec-hdr" style="padding-top:12px;">
+    <h3>✍️ Draw your own doodle</h3>
+    <small>Save it as a stamp to use in Create!</small>
+  </div>
+  <div class="canvas-wrap" id="doodle-wrap" style="min-height:220px;background:#fff;">
+    <canvas id="doodle-canvas" style="display:block;width:100%;"></canvas>
+  </div>
+  <div class="doodle-tbar">
+    <button class="tb active" id="dd-pen" onclick="setDoodleTool('pen')">✏️ Pen</button>
+    <button class="tb" id="dd-eraser" onclick="setDoodleTool('eraser')">🧹 Erase</button>
+    <input type="range" id="dd-sz" min="1" max="20" value="4" style="flex:1;" oninput="ddSz=+this.value">
+    <input type="color" id="dd-color" value="#000000" class="cc" oninput="ddColor=this.value">
+  </div>
+  <div class="doodle-actions">
+    <button class="btn-clear-doodle" onclick="clearDoodle()">Clear</button>
+    <button class="btn-save-doodle" onclick="saveDoodleAsStamp()">💾 Save as Stamp</button>
+  </div>
+  <p class="save-hint">Auto-crops & makes background transparent • Find it in Create → Stamps → "Mine"</p>
+  <div class="gap"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="stamps.js"></script>
+<script src="templates.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

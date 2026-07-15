@@ -931,6 +931,8 @@ function initDoodleCanvas() {
   ddCtx.fillRect(0, 0, w, h);
   if (!dc._bound) { dc._bound = true; bindDoodle(dc); }
 }
+
+function setDoodleTool(t) {
   ddTool = t;
   document.getElementById('dd-pen').classList.toggle('active',    t === 'pen');
   document.getElementById('dd-eraser').classList.toggle('active', t === 'eraser');

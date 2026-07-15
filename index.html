@@ -46,13 +46,17 @@ header{background:rgba(255,255,255,0.8);backdrop-filter:blur(16px);border-bottom
 .panel{display:none;}
 .panel.active{display:block;}
 
-.canvas-wrap{position:relative;margin:12px 12px 0;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px var(--shadow),0 0 0 1.5px rgba(200,180,240,0.25);touch-action:none;background:#fff;}
-canvas{display:block;width:100%;touch-action:none;cursor:crosshair;}
+.canvas-wrap{position:relative;margin:12px 12px 0;border-radius:18px;overflow:hidden;box-shadow:0 4px 20px var(--shadow),0 0 0 1.5px rgba(200,180,240,0.25);background:#fff;}
+canvas{display:block;}
 
 .toolbar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:rgba(255,255,255,0.9);margin:0 12px;border-radius:0 0 14px 14px;flex-wrap:wrap;justify-content:center;box-shadow:0 3px 12px rgba(150,130,200,0.08);}
 .tb{width:34px;height:34px;border-radius:10px;border:none;background:rgba(240,235,255,0.8);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;color:#7A6B9A;font-weight:700;flex-shrink:0;}
 .tb.active{background:linear-gradient(135deg,#C9B8E8,#E8C8D8);color:#fff;}
 .tdiv{width:1px;height:22px;background:rgba(180,160,220,0.25);margin:0 1px;flex-shrink:0;}
+
+#sel-bar{display:none;align-items:center;gap:6px;padding:6px 12px;margin:6px 12px 0;background:rgba(200,180,240,0.15);border-radius:10px;border:1px dashed rgba(200,180,240,0.5);}
+#sel-bar span{font-size:10px;color:#7A6B9A;font-weight:700;margin-right:auto;}
+#sel-bar button{padding:5px 10px;border-radius:8px;border:none;background:rgba(255,255,255,0.9);font-size:11px;font-weight:700;color:#9B85CC;cursor:pointer;}
 
 .brush-row{display:flex;gap:6px;padding:8px 12px 4px;overflow-x:auto;scrollbar-width:none;}
 .brush-row::-webkit-scrollbar{display:none;}
@@ -79,6 +83,9 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 .sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 12px 3px;}
 .sec-hdr h3{font-size:12px;font-weight:700;color:#9B85CC;}
 .sec-hdr small{font-size:9px;color:#B0A0C8;}
+
+#ref-controls{display:none;align-items:center;gap:8px;padding:6px 12px;margin:6px 12px 0;background:rgba(255,240,250,0.6);border-radius:10px;flex-wrap:wrap;}
+#ref-controls button{padding:6px 10px;border-radius:8px;border:none;background:rgba(255,255,255,0.9);font-size:11px;font-weight:700;color:#9B85CC;cursor:pointer;}
 
 .search-row{padding:2px 12px 6px;}
 .search-row input{width:100%;padding:7px 12px;border-radius:10px;border:1.5px solid rgba(200,180,240,0.4);font-size:12px;font-family:'Quicksand',sans-serif;outline:none;}
@@ -129,6 +136,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 <div id="err-bar"></div>
 <div id="heart-rain"></div>
+<input type="file" id="ref-file-input" accept="image/*" style="display:none;">
 
 <div id="love-modal" class="modal">
   <div class="mcard" style="text-align:center;">
@@ -172,16 +180,30 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <canvas id="main-canvas"></canvas>
   </div>
 
+  <div id="sel-bar">
+    <span>Selected object:</span>
+    <button onclick="dupSelected()">📄 Duplicate</button>
+    <button onclick="bringFront()">⬆ Front</button>
+    <button onclick="sendBack()">⬇ Back</button>
+    <button onclick="deleteSelected()">🗑 Delete</button>
+  </div>
+
   <div class="toolbar">
-    <button class="tb" onclick="undoMain()">↩</button>
-    <button class="tb" onclick="redoMain()">↪</button>
-    <button class="tb" id="t-fill" onclick="setTool('fill')">🪣</button>
-    <button class="tb" id="t-eraser" onclick="setTool('eraser')">🧹</button>
-    <button class="tb" id="t-text" onclick="setTool('text')">T</button>
+    <button class="tb" onclick="undoMain()" title="Undo">↩</button>
+    <button class="tb" onclick="redoMain()" title="Redo">↪</button>
     <div class="tdiv"></div>
-    <button class="tb" onclick="clearMain()">🗑</button>
+    <button class="tb" onclick="openRefPicker()" title="Reference image">📷</button>
+    <button class="tb" onclick="confettiBurst()" title="Confetti">🎉</button>
     <div class="tdiv"></div>
-    <button class="tb" onclick="openDL('main')">💾</button>
+    <button class="tb" onclick="clearMain()" title="Clear all">🗑️</button>
+    <button class="tb" onclick="openDL('main')" title="Download">💾</button>
+  </div>
+
+  <div id="ref-controls">
+    <button id="ref-lock-btn" onclick="toggleRefLock()">🔒 Lock Ref</button>
+    <span class="lbl">Opacity</span>
+    <input type="range" min="10" max="80" value="35" style="width:70px;" oninput="setRefOpacity(this.value/100)">
+    <button onclick="removeReference()">✕ Remove</button>
   </div>
 
   <div class="brush-row" id="brush-type-row"></div>
@@ -189,7 +211,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
   <div class="swatch-row" id="draw-colors"></div>
   <div class="row-sl">
     <span class="lbl">Size</span>
-    <input type="range" id="brush-sz" min="1" max="40" value="5" oninput="brushSz=+this.value;document.getElementById('bsv').textContent=this.value">
+    <input type="range" id="brush-sz" min="1" max="40" value="5" oninput="brushSz=+this.value;document.getElementById('bsv').textContent=this.value;if(fCanvas&&fCanvas.isDrawingMode)fCanvas.freeDrawingBrush=buildBrush(curTool);">
     <span class="lbl-val" id="bsv">5</span>
   </div>
   <div class="row-sl">
@@ -205,7 +227,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
   <div class="sec-hdr">
     <h3>🎁 Doodle Stamps</h3>
-    <small>Tap stamp → tap canvas</small>
+    <small>Tap stamp → tap canvas → drag/resize freely!</small>
   </div>
   <div class="search-row"><input type="text" id="stamp-search" placeholder="🔍 Search stamps..."></div>
   <div class="stamp-cats" id="stamp-cats"></div>
@@ -278,6 +300,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
 <script src="stamps.js"></script>
 <script src="templates.js"></script>
 <script src="app.js"></script>

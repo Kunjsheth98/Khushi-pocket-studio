@@ -261,8 +261,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;heigh
     <h3>✍️ Draw your own doodle</h3>
     <small>Save it as a stamp to use in Create!</small>
   </div>
-  <div class="canvas-wrap" id="doodle-wrap">
-    <canvas id="doodle-canvas"></canvas>
+  <div class="canvas-wrap" id="doodle-wrap" style="min-height:220px;background:#fff;">
+    <canvas id="doodle-canvas" style="display:block;width:100%;"></canvas>
   </div>
   <div class="doodle-tbar">
     <button class="tb active" id="dd-pen"    onclick="setDoodleTool('pen')">✏️ Pen</button>
@@ -352,15 +352,8 @@ window.addEventListener('DOMContentLoaded', () => {
   pushUndo();
   bindMain(mc);
 
-  // Doodle canvas
-  const dc = document.getElementById('doodle-canvas');
-  const dw = dc.parentElement.clientWidth;
-  dc.width = dw;
-  dc.height = Math.round(dw * 0.6);
-  ddCtx = dc.getContext('2d');
-  ddCtx.fillStyle = '#FFFFFF';
-  ddCtx.fillRect(0, 0, dc.width, dc.height);
-  bindDoodle(dc);
+  // Doodle canvas — use window.innerWidth as fallback since panel may be hidden (display:none) on load
+  initDoodleCanvas();
 
   buildColorRow();
   buildBgRow();
@@ -373,13 +366,18 @@ window.addEventListener('DOMContentLoaded', () => {
 // ══════════════════════════
 //  TAB SWITCHING
 // ══════════════════════════
+let doodleInited = false;
 function switchTab(t) {
   ['create','colour','draw'].forEach(id => {
     document.getElementById(id+'-mode').classList.toggle('active', id === t);
     document.getElementById('tab-'+id).classList.toggle('active', id === t);
   });
-  // Cancel stamp mode when leaving create tab
   if (t !== 'create') cancelStamp();
+  // Init doodle canvas the first time Draw tab is opened (panel now visible so clientWidth is correct)
+  if (t === 'draw' && !doodleInited) {
+    doodleInited = true;
+    setTimeout(initDoodleCanvas, 50); // tiny delay ensures layout is painted
+  }
 }
 
 // ══════════════════════════
@@ -920,7 +918,19 @@ function applyDdStyle() {
   }
 }
 
-function setDoodleTool(t) {
+function initDoodleCanvas() {
+  const dc = document.getElementById('doodle-canvas');
+  // Use window.innerWidth as fallback when panel is hidden (clientWidth = 0)
+  const w = dc.parentElement.clientWidth || (window.innerWidth - 24);
+  const h = Math.round(w * 0.65);
+  dc.width  = w;
+  dc.height = h;
+  dc.style.height = h + 'px';
+  ddCtx = dc.getContext('2d');
+  ddCtx.fillStyle = '#FFFFFF';
+  ddCtx.fillRect(0, 0, w, h);
+  if (!dc._bound) { dc._bound = true; bindDoodle(dc); }
+}
   ddTool = t;
   document.getElementById('dd-pen').classList.toggle('active',    t === 'pen');
   document.getElementById('dd-eraser').classList.toggle('active', t === 'eraser');
